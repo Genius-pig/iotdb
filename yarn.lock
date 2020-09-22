@@ -978,6 +978,16 @@
   resolved "https://registry.yarnpkg.com/@grafana/eslint-config/-/eslint-config-1.0.0-rc1.tgz#3b0a1abddfea900a57abc9526ad31abb1da2d42c"
   integrity sha512-xmcJR6mUYw1llq3m8gT2kE7xoq6yLMUgNf2Mf1yZvDCx2cXFSyaLlGs1dqjFWjJDbV46GdhYRAyRbyGR+J9QKg==
 
+"@grafana/runtime@7.0.1":
+  version "7.0.1"
+  resolved "https://registry.npm.taobao.org/@grafana/runtime/download/@grafana/runtime-7.0.1.tgz#e1a4fd010d124db4f7572564f579ffadd63e2ac3"
+  integrity sha1-4aT9AQ0STbT3VyVk9Xn/rdY+KsM=
+  dependencies:
+    "@grafana/data" "7.0.1"
+    "@grafana/ui" "7.0.1"
+    systemjs "0.20.19"
+    systemjs-plugin-css "0.1.37"
+
 "@grafana/slate-react@0.22.9-grafana":
   version "0.22.9-grafana"
   resolved "https://registry.yarnpkg.com/@grafana/slate-react/-/slate-react-0.22.9-grafana.tgz#07f35f0ffc018f616b9f82fa6e5ba65fae75c6a0"
@@ -9217,6 +9227,11 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
+prettier@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.npm.taobao.org/prettier/download/prettier-2.1.2.tgz?cache=0&sync_timestamp=1600215497530&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fprettier%2Fdownload%2Fprettier-2.1.2.tgz#3050700dae2e4c8b67c4c3f666cdb8af405e1ce5"
+  integrity sha1-MFBwDa4uTItnxMP2Zs24r0BeHOU=
+
 prettier@^1.19.1:
   version "1.19.1"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.19.1.tgz#f7d7f5ff8a9cd872a7be4ca142095956a60797cb"
@@ -11096,6 +11111,16 @@ symbol-tree@^3.2.2:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
+
+systemjs-plugin-css@0.1.37:
+  version "0.1.37"
+  resolved "https://registry.npm.taobao.org/systemjs-plugin-css/download/systemjs-plugin-css-0.1.37.tgz#684847252ca69b7da24a1201094c86274324e82f"
+  integrity sha1-aEhHJSymm32iShIBCUyGJ0Mk6C8=
+
+systemjs@0.20.19:
+  version "0.20.19"
+  resolved "https://registry.npm.taobao.org/systemjs/download/systemjs-0.20.19.tgz#c2b9e79c19f4bea53a19b1ed3f974ffb463be949"
+  integrity sha1-wrnnnBn0vqU6GbHtP5dP+0Y76Uk=
 
 table-layout@^0.4.3:
   version "0.4.5"

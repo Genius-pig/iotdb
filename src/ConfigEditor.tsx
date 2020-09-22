@@ -14,8 +14,9 @@ export class ConfigEditor extends PureComponent<Props, State> {
     const { onOptionsChange, options } = this.props;
     const jsonData = {
       ...options.jsonData,
-      path: event.target.value,
+      url: event.target.value,
     };
+    console.log(jsonData.url);
     onOptionsChange({ ...options, jsonData });
   };
 
@@ -28,6 +29,25 @@ export class ConfigEditor extends PureComponent<Props, State> {
         apiKey: event.target.value,
       },
     });
+  };
+
+  //
+  onUserChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { onOptionsChange, options } = this.props;
+    const jsonData = {
+      ...options.jsonData,
+      username: event.target.value,
+    };
+    onOptionsChange({ ...options, jsonData });
+  };
+
+  onPassWordChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { onOptionsChange, options } = this.props;
+    const jsonData = {
+      ...options.jsonData,
+      password: event.target.value,
+    };
+    onOptionsChange({ ...options, jsonData });
   };
 
   onResetAPIKey = () => {
@@ -74,6 +94,32 @@ export class ConfigEditor extends PureComponent<Props, State> {
               inputWidth={20}
               onReset={this.onResetAPIKey}
               onChange={this.onAPIKeyChange}
+            />
+          </div>
+        </div>
+
+        <div className="gf-form-inline">
+          <div className="gf-form">
+            <FormField
+              value={jsonData.username || ''}
+              label="username"
+              placeholder="please input username"
+              labelWidth={6}
+              inputWidth={20}
+              onChange={this.onUserChange}
+            />
+          </div>
+        </div>
+
+        <div className="gf-form-inline">
+          <div className="gf-form">
+            <FormField
+              value={jsonData.password || ''}
+              label="password"
+              placeholder="please input password"
+              labelWidth={6}
+              inputWidth={20}
+              onChange={this.onPassWordChange}
             />
           </div>
         </div>

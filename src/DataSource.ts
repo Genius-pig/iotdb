@@ -1,4 +1,5 @@
 import defaults from 'lodash/defaults';
+import { getBackendSrv } from '@grafana/runtime';
 
 import {
   DataQueryRequest,
@@ -12,8 +13,15 @@ import {
 import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
+  username: string;
+  password: string;
+  url: string;
+
   constructor(instanceSettings: DataSourceInstanceSettings<MyDataSourceOptions>) {
     super(instanceSettings);
+    this.url = instanceSettings.jsonData.url;
+    this.password = instanceSettings.jsonData.password;
+    this.username = instanceSettings.jsonData.username;
   }
 
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
@@ -37,10 +45,10 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   }
 
   async testDatasource() {
-    // Implement a health check for your data source.
-    return {
-      status: 'success',
-      message: 'Success',
-    };
+    console.log(this.url + '/user/login?username=' + this.username + '&password=' + this.password);
+    return getBackendSrv().datasourceRequest({
+      url: this.url + '/user/login?username=' + this.username + '&password=' + this.password,
+      method: 'GET',
+    });
   }
 }

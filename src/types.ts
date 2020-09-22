@@ -1,8 +1,21 @@
 import { DataQuery, DataSourceJsonData } from '@grafana/data';
 
 export interface MyQuery extends DataQuery {
-  queryText?: string;
+  timeSeries: string[];
+  aggregations?: string[];
+  fill?: Fill;
+  groupBy?: GroupBy;
   constant: number;
+}
+
+export interface GroupBy {
+  step: string;
+  interval: string;
+}
+
+export interface Fill {
+  dataType: string;
+  previous: string;
 }
 
 export const defaultQuery: Partial<MyQuery> = {
@@ -13,7 +26,9 @@ export const defaultQuery: Partial<MyQuery> = {
  * These are options configured for each DataSource instance
  */
 export interface MyDataSourceOptions extends DataSourceJsonData {
-  url?: string;
+  url: string;
+  password: string;
+  username: string;
 }
 
 /**
