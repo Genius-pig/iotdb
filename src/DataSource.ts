@@ -1,4 +1,3 @@
-import defaults from 'lodash/defaults';
 import { getBackendSrv } from '@grafana/runtime';
 
 import {
@@ -10,7 +9,7 @@ import {
   FieldType,
 } from '@grafana/data';
 
-import { MyQuery, MyDataSourceOptions, defaultQuery } from './types';
+import { MyQuery, MyDataSourceOptions } from './types';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   username: string;
@@ -31,12 +30,22 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
     // Return a constant for each query.
     const data = options.targets.map(target => {
-      const query = defaults(target, defaultQuery);
+      target.from = range!.from.valueOf();
+      target.to = range!.to.valueOf();
+      console.log(target);
+      getBackendSrv()
+        .datasourceRequest({
+          url: this.url + '/query',
+          method: 'POST',
+          data: target,
+        })
+        .then(response => response.json)
+        .then(data => console.log(data));
       return new MutableDataFrame({
-        refId: query.refId,
+        refId: target.refId,
         fields: [
           { name: 'Time', values: [from, to], type: FieldType.time },
-          { name: 'Value', values: [query.constant, query.constant], type: FieldType.number },
+          { name: 'Value', values: [6.5, 6.5], type: FieldType.number },
         ],
       });
     });

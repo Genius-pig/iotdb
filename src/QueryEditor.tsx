@@ -1,26 +1,28 @@
-import defaults from 'lodash/defaults';
-
-import React, { ChangeEvent, PureComponent } from 'react';
+import React, { PureComponent } from 'react';
 import { toOption } from './functions';
 import { QueryEditorProps } from '@grafana/data';
 import { DataSource } from './DataSource';
-import { defaultQuery, Fill, GroupBy, MyDataSourceOptions, MyQuery } from './types';
+import { Fill, GroupBy, MyDataSourceOptions, MyQuery } from './types';
 
 import { QueryInlineField } from './componments/Form';
 import { TimeSeries } from './componments/TimeSeries';
 import { GroupByLabel } from './componments/GroupBy';
 import { Aggregation } from './componments/Aggregation';
 import { FillClause } from './componments/Fill';
+import { Segment } from '@grafana/ui';
 
 interface State {
   timeSeries: string[];
   aggregations: string[];
   groupBy: GroupBy;
-  fillClause: Fill;
+  fillClauses: Fill[];
+  isPoint: boolean;
+  point: string;
+  isAggregated: boolean;
+  aggregated: string;
 }
 
 const selectElement = [
-  'RAW',
   'MIN_TIME',
   'MAX_TIME',
   'MIN_VALUE',
@@ -32,6 +34,9 @@ const selectElement = [
   'LAST_VALUE',
 ];
 
+const selectPoint = ['sampling interval', 'sampling points'];
+const selectRaw = ['Raw', 'Aggregation'];
+
 type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
 export class QueryEditor extends PureComponent<Props, State> {
@@ -39,13 +44,15 @@ export class QueryEditor extends PureComponent<Props, State> {
     timeSeries: [],
     aggregations: [],
     groupBy: {
-      interval: '',
+      samplingInterval: '',
       step: '',
+      samplingPoints: 0,
     },
-    fillClause: {
-      previous: '',
-      dataType: '',
-    },
+    fillClauses: [],
+    isPoint: true,
+    point: selectPoint[1],
+    isAggregated: false,
+    aggregated: selectRaw[0],
   };
 
   onTimeSeriesChange = (t: string[]) => {
@@ -60,10 +67,10 @@ export class QueryEditor extends PureComponent<Props, State> {
     onChange({ ...query, aggregations: a });
   };
 
-  onFillChange = (f: Fill) => {
+  onFillsChange = (f: Fill[]) => {
     const { onChange, query } = this.props;
-    this.setState({ fillClause: f });
-    onChange({ ...query, fill: f });
+    this.setState({ fillClauses: f });
+    onChange({ ...query, fills: f });
   };
 
   onGroupByChange = (g: GroupBy) => {
@@ -72,15 +79,7 @@ export class QueryEditor extends PureComponent<Props, State> {
     onChange({ ...query, groupBy: g });
   };
 
-  onConstantChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { onChange, query, onRunQuery } = this.props;
-    onChange({ ...query, constant: parseFloat(event.target.value) });
-    // executes the query
-    onRunQuery();
-  };
-
   render() {
-    defaults(this.props.query, defaultQuery);
     return (
       <>
         <div className="gf-form">
@@ -90,27 +89,64 @@ export class QueryEditor extends PureComponent<Props, State> {
               onChange={this.onTimeSeriesChange}
               variableOptionGroup={selectElement.map(toOption)}
             />
-          </QueryInlineField>
-        </div>
-        <div className="gf-form">
-          <QueryInlineField label={'Function'}>
-            <Aggregation
-              aggregations={this.state.aggregations}
-              onChange={this.onAggregationsChange}
-              variableOptionGroup={selectElement.map(toOption)}
+            <Segment
+              onChange={({ value: value = '' }) => {
+                const { onChange, query } = this.props;
+                if (value === selectRaw[0]) {
+                  this.setState({ isAggregated: false, aggregated: selectRaw[0] });
+                  onChange({ ...query, isAggregated: false });
+                } else {
+                  this.setState({ isAggregated: true, aggregated: selectRaw[1] });
+                  onChange({ ...query, isAggregated: true });
+                }
+              }}
+              options={selectRaw.map(toOption)}
+              value={this.state.aggregated}
+              className="query-keyword"
             />
           </QueryInlineField>
         </div>
-        <div className="gf-form">
-          <QueryInlineField label={'Group By'}>
-            <GroupByLabel groupBy={this.state.groupBy} onChange={this.onGroupByChange} />
-          </QueryInlineField>
-        </div>
-        <div className="gf-form">
-          <QueryInlineField label={'Fill'}>
-            <FillClause fillClause={this.state.fillClause} onChange={this.onFillChange} />
-          </QueryInlineField>
-        </div>
+        {this.state.isAggregated && (
+          <>
+            <div className="gf-form">
+              <QueryInlineField label={'Function'}>
+                <Aggregation
+                  aggregations={this.state.aggregations}
+                  onChange={this.onAggregationsChange}
+                  variableOptionGroup={selectElement.map(toOption)}
+                />
+              </QueryInlineField>
+            </div>
+            <div className="gf-form">
+              <QueryInlineField label={'Group By'}>
+                <Segment
+                  onChange={({ value: value = '' }) => {
+                    const { onChange, query } = this.props;
+                    if (value === selectPoint[0]) {
+                      this.setState({ isPoint: false, point: selectPoint[0] });
+                      onChange({ ...query, isPoint: false });
+                    } else {
+                      this.setState({ isPoint: true, point: selectPoint[1] });
+                      onChange({ ...query, isPoint: true });
+                    }
+                  }}
+                  value={this.state.point}
+                  options={selectPoint.map(toOption)}
+                />
+                <GroupByLabel
+                  groupBy={this.state.groupBy}
+                  onChange={this.onGroupByChange}
+                  isPoint={this.state.isPoint}
+                />
+              </QueryInlineField>
+            </div>
+            <div className="gf-form">
+              <QueryInlineField label={'Fill'}>
+                <FillClause fillClauses={this.state.fillClauses} onChange={this.onFillsChange} />
+              </QueryInlineField>
+            </div>
+          </>
+        )}
       </>
     );
   }
