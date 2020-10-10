@@ -6,10 +6,10 @@ import {
   DataSourceApi,
   DataSourceInstanceSettings,
   MutableDataFrame,
-  FieldType,
 } from '@grafana/data';
 
 import { MyQuery, MyDataSourceOptions } from './types';
+import { toDataFrame } from './functions';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   username: string;
@@ -25,29 +25,34 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
     const { range } = options;
-    const from = range!.from.valueOf();
-    const to = range!.to.valueOf();
 
     // Return a constant for each query.
     const data = options.targets.map(target => {
       target.from = range!.from.valueOf();
       target.to = range!.to.valueOf();
       console.log(target);
+      let d: MutableDataFrame = new MutableDataFrame({ refId: target.refId, fields: [] });
       getBackendSrv()
         .datasourceRequest({
           url: this.url + '/query',
           method: 'POST',
           data: target,
         })
-        .then(response => response.json)
-        .then(data => console.log(data));
-      return new MutableDataFrame({
-        refId: target.refId,
-        fields: [
-          { name: 'Time', values: [from, to], type: FieldType.time },
-          { name: 'Value', values: [6.5, 6.5], type: FieldType.number },
-        ],
-      });
+        .then(response => response.data)
+        .then(data => {
+          if (data instanceof Array) {
+            console.log(data);
+            return data.map(toDataFrame);
+          } else {
+            throw new Error(data.toString());
+          }
+        })
+        .then(f => {
+          console.log(f);
+          d = new MutableDataFrame({ refId: target.refId, fields: f });
+          console.log(d);
+        });
+      return d;
     });
 
     return { data };

@@ -38,3 +38,8 @@ export interface MyDataSourceOptions extends DataSourceJsonData {
 export interface MySecureJsonData {
   apiKey?: string;
 }
+
+export interface Col {
+  name: string;
+  values: [];
+}
