@@ -1,15 +1,13 @@
 import { getBackendSrv } from '@grafana/runtime';
-
 import {
   DataQueryRequest,
   DataQueryResponse,
   DataSourceApi,
   DataSourceInstanceSettings,
-  MutableDataFrame,
+  toDataFrame,
 } from '@grafana/data';
 
-import { MyQuery, MyDataSourceOptions } from './types';
-import { toDataFrame } from './functions';
+import { MyDataSourceOptions, MyQuery } from './types';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   username: string;
@@ -25,37 +23,26 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
     const { range } = options;
-
-    // Return a constant for each query.
-    const data = options.targets.map(target => {
+    const dataFrames = options.targets.map(target => {
       target.from = range!.from.valueOf();
       target.to = range!.to.valueOf();
-      console.log(target);
-      let d: MutableDataFrame = new MutableDataFrame({ refId: target.refId, fields: [] });
-      getBackendSrv()
-        .datasourceRequest({
-          url: this.url + '/query',
-          method: 'POST',
-          data: target,
-        })
-        .then(response => response.data)
-        .then(data => {
-          if (data instanceof Array) {
-            console.log(data);
-            return data.map(toDataFrame);
-          } else {
-            throw new Error(data.toString());
-          }
-        })
-        .then(f => {
-          console.log(f);
-          d = new MutableDataFrame({ refId: target.refId, fields: f });
-          console.log(d);
+      return this.doRequest(target).then(response => {
+        return response.data.map((a: any) => {
+          const dataframe = toDataFrame(a);
+          dataframe.length = NaN;
+          return dataframe;
         });
-      return d;
+      });
     });
+    return Promise.all(dataFrames).then(data => ({ data }));
+  }
 
-    return { data };
+  async doRequest(query: MyQuery) {
+    return await getBackendSrv().datasourceRequest({
+      method: 'POST',
+      url: this.url + '/query',
+      data: query,
+    });
   }
 
   async testDatasource() {
