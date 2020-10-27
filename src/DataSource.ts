@@ -28,9 +28,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       target.to = range!.to.valueOf();
       return this.doRequest(target).then(response => {
         return response.data.map((a: any) => {
-          const dataframe = toDataFrame(a);
-          dataframe.length = NaN;
-          return dataframe;
+          return toDataFrame(a);
         });
       });
     });
