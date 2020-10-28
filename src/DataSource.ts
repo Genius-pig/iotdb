@@ -13,6 +13,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   username: string;
   password: string;
   url: string;
+  data: any[] = [];
 
   constructor(instanceSettings: DataSourceInstanceSettings<MyDataSourceOptions>) {
     super(instanceSettings);
@@ -23,24 +24,38 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
 
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
     const { range } = options;
-    const dataFrames = options.targets.map(target => {
+    options.targets.map(target => {
+      console.log(target);
+      console.log(range);
       target.from = range!.from.valueOf();
       target.to = range!.to.valueOf();
-      return this.doRequest(target).then(response => {
-        return response.data.map((a: any) => {
-          return toDataFrame(a);
-        });
-      });
+      this.doRequest(target);
     });
+
+    const dataFrames = this.data.map(toDataFrame);
+    // const { range } = options;
+    // const timeValues = [range!.from.valueOf(), range!.to.valueOf()];
+    // const numberValues = [12.3, 28.6];
+    //
+    // Create data frame from values.
+    // const frame = toDataFrame({
+    //   name: 'http_requests_total',
+    //   fields: [
+    //     { name: 'Time', type: FieldType.time, values: timeValues },
+    //     { name: 'Value', type: FieldType.number, values: numberValues },
+    //   ],
+    // });
     return Promise.all(dataFrames).then(data => ({ data }));
   }
 
   async doRequest(query: MyQuery) {
-    return await getBackendSrv().datasourceRequest({
-      method: 'POST',
-      url: this.url + '/query',
-      data: query,
-    });
+    await getBackendSrv()
+      .datasourceRequest({
+        method: 'POST',
+        url: this.url + '/query',
+        data: query,
+      })
+      .then(response => (this.data = response.data));
   }
 
   async testDatasource() {
