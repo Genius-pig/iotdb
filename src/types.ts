@@ -7,8 +7,6 @@ export interface MyQuery extends DataQuery {
   groupBy?: GroupBy;
   from: number;
   to: number;
-  isPoint?: boolean;
-  isAggregated?: boolean;
 }
 
 export interface GroupBy {

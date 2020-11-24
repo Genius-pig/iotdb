@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { toOption } from './functions';
-import { QueryEditorProps } from '@grafana/data';
+import { QueryEditorProps, SelectableValue } from '@grafana/data';
 import { DataSource } from './DataSource';
 import { Fill, GroupBy, MyDataSourceOptions, MyQuery } from './types';
 
@@ -10,9 +10,11 @@ import { GroupByLabel } from './componments/GroupBy';
 import { Aggregation } from './componments/Aggregation';
 import { FillClause } from './componments/Fill';
 import { Segment } from '@grafana/ui';
+import { getChildPaths } from './functions'
 
 interface State {
   timeSeries: string[];
+  options: Array<SelectableValue<string>>[];
   aggregations: string[];
   groupBy: GroupBy;
   fillClauses: Fill[];
@@ -42,6 +44,7 @@ type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 export class QueryEditor extends PureComponent<Props, State> {
   state: State = {
     timeSeries: [],
+    options: [],
     aggregations: [],
     groupBy: {
       samplingInterval: '',
@@ -79,6 +82,22 @@ export class QueryEditor extends PureComponent<Props, State> {
     onChange({ ...query, groupBy: g });
   };
 
+  onOptionsChange = (options: Array<SelectableValue<string>>[]) => {
+    if(this.state.timeSeries.length === options.length) {
+      if(this.state.timeSeries.length === 0) {
+        getChildPaths(["root"], this.props.datasource.url).then( childPaths => {
+          this.setState({options : [...options, childPaths]})
+        });
+      } else {
+        getChildPaths(["root", ...this.state.timeSeries], this.props.datasource.url).then( childPaths => {
+          this.setState({options : [...options, childPaths]})
+        });
+      }
+    } else {
+      throw Error("can't find child path");
+    }
+  }
+
   render() {
     return (
       <>
@@ -87,17 +106,15 @@ export class QueryEditor extends PureComponent<Props, State> {
             <TimeSeries
               timeSeries={this.state.timeSeries}
               onChange={this.onTimeSeriesChange}
-              variableOptionGroup={selectElement.map(toOption)}
+              variableOptionGroup={this.state.options}
+              onChangeOptions={this.onOptionsChange}
             />
             <Segment
               onChange={({ value: value = '' }) => {
-                const { onChange, query } = this.props;
                 if (value === selectRaw[0]) {
                   this.setState({ isAggregated: false, aggregated: selectRaw[0] });
-                  onChange({ ...query, isAggregated: false });
                 } else {
                   this.setState({ isAggregated: true, aggregated: selectRaw[1] });
-                  onChange({ ...query, isAggregated: true });
                 }
               }}
               options={selectRaw.map(toOption)}
@@ -121,13 +138,10 @@ export class QueryEditor extends PureComponent<Props, State> {
               <QueryInlineField label={'Group By'}>
                 <Segment
                   onChange={({ value: value = '' }) => {
-                    const { onChange, query } = this.props;
                     if (value === selectPoint[0]) {
                       this.setState({ isPoint: false, point: selectPoint[0] });
-                      onChange({ ...query, isPoint: false });
                     } else {
                       this.setState({ isPoint: true, point: selectPoint[1] });
-                      onChange({ ...query, isPoint: true });
                     }
                   }}
                   value={this.state.point}
