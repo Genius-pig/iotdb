@@ -10,11 +10,11 @@ import { GroupByLabel } from './componments/GroupBy';
 import { Aggregation } from './componments/Aggregation';
 import { FillClause } from './componments/Fill';
 import { Segment } from '@grafana/ui';
-import { getChildPaths } from './functions'
+import { getChildPaths } from './functions';
 
 interface State {
   timeSeries: string[];
-  options: Array<SelectableValue<string>>[];
+  options: Array<Array<SelectableValue<string>>>;
   aggregations: string[];
   groupBy: GroupBy;
   fillClauses: Fill[];
@@ -82,21 +82,21 @@ export class QueryEditor extends PureComponent<Props, State> {
     onChange({ ...query, groupBy: g });
   };
 
-  onOptionsChange = (options: Array<SelectableValue<string>>[]) => {
-    if(this.state.timeSeries.length === options.length) {
-      if(this.state.timeSeries.length === 0) {
-        getChildPaths(["root"], this.props.datasource.url).then( childPaths => {
-          this.setState({options : [...options, childPaths]})
+  onOptionsChange = (options: Array<Array<SelectableValue<string>>>) => {
+    if (this.state.timeSeries.length === options.length) {
+      if (this.state.timeSeries.length === 0) {
+        getChildPaths(['root'], this.props.datasource.url).then(childPaths => {
+          this.setState({ options: [...options, childPaths] });
         });
       } else {
-        getChildPaths(["root", ...this.state.timeSeries], this.props.datasource.url).then( childPaths => {
-          this.setState({options : [...options, childPaths]})
+        getChildPaths(['root', ...this.state.timeSeries], this.props.datasource.url).then(childPaths => {
+          this.setState({ options: [...options, childPaths] });
         });
       }
     } else {
       throw Error("can't find child path");
     }
-  }
+  };
 
   render() {
     return (

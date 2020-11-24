@@ -5,14 +5,19 @@ import { Segment, Icon, InlineFormLabel } from '@grafana/ui';
 export interface Props {
   timeSeries: string[];
   onChange: (path: string[]) => void;
-  variableOptionGroup: Array<SelectableValue<string>>[];
-  onChangeOptions: (options: Array<SelectableValue<string>>[]) => void
+  variableOptionGroup: Array<Array<SelectableValue<string>>>;
+  onChangeOptions: (options: Array<Array<SelectableValue<string>>>) => void;
 }
 
 const removeText = '-- remove stat --';
 const removeOption: SelectableValue<string> = { label: removeText, value: removeText };
 
-export const TimeSeries: FunctionComponent<Props> = ({ timeSeries, onChange, variableOptionGroup, onChangeOptions}) => {
+export const TimeSeries: FunctionComponent<Props> = ({
+  timeSeries,
+  onChange,
+  variableOptionGroup,
+  onChangeOptions,
+}) => {
   return (
     <>
       <>
@@ -30,7 +35,7 @@ export const TimeSeries: FunctionComponent<Props> = ({ timeSeries, onChange, var
                 if (selectValue === removeText) {
                   onChange(timeSeries.filter((_, i) => i >= index));
                   onChangeOptions(variableOptionGroup.filter((_, i) => i >= index));
-                } else if (selectValue != value){
+                } else if (selectValue !== value) {
                   onChange(timeSeries.map((v, i) => (i === index ? selectValue : v)).filter((_, i) => i > index));
                   onChangeOptions(variableOptionGroup.filter((_, i) => i > index));
                 }
