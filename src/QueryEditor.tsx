@@ -14,7 +14,7 @@ import { Segment } from '@grafana/ui';
 interface State {
   timeSeries: string[];
   options: Array<Array<SelectableValue<string>>>;
-  aggregations: string[];
+  aggregation: string;
   groupBy: GroupBy;
   fillClauses: Fill[];
   isPoint: boolean;
@@ -45,7 +45,7 @@ export class QueryEditor extends PureComponent<Props, State> {
   state: State = {
     timeSeries: [],
     options: [[toOption('')]],
-    aggregations: [],
+    aggregation: '',
     groupBy: {
       samplingInterval: '',
       step: '',
@@ -84,10 +84,10 @@ export class QueryEditor extends PureComponent<Props, State> {
     }
   };
 
-  onAggregationsChange = (a: string[]) => {
+  onAggregationsChange = (a: string) => {
     const { onChange, query } = this.props;
-    this.setState({ aggregations: a });
-    onChange({ ...query, aggregations: a });
+    this.setState({ aggregation: a });
+    onChange({ ...query, aggregation: a });
   };
 
   onFillsChange = (f: Fill[]) => {
@@ -141,7 +141,7 @@ export class QueryEditor extends PureComponent<Props, State> {
             <div className="gf-form">
               <QueryInlineField label={'Function'}>
                 <Aggregation
-                  aggregations={this.state.aggregations}
+                  aggregation={this.state.aggregation}
                   onChange={this.onAggregationsChange}
                   variableOptionGroup={selectElement.map(toOption)}
                 />

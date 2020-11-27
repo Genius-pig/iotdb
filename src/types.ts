@@ -2,7 +2,7 @@ import { DataQuery, DataSourceJsonData } from '@grafana/data';
 
 export interface MyQuery extends DataQuery {
   timeSeries: string[];
-  aggregations?: string[];
+  aggregation?: string;
   fills?: Fill[];
   groupBy?: GroupBy;
   from: number;
