@@ -4,20 +4,14 @@ import { Segment, Icon, InlineFormLabel } from '@grafana/ui';
 
 export interface Props {
   timeSeries: string[];
-  onChange: (path: string[]) => void;
+  onChange: (path: string[], options: Array<Array<SelectableValue<string>>>) => void;
   variableOptionGroup: Array<Array<SelectableValue<string>>>;
-  onChangeOptions: (options: Array<Array<SelectableValue<string>>>) => void;
 }
 
 const removeText = '-- remove stat --';
 const removeOption: SelectableValue<string> = { label: removeText, value: removeText };
 
-export const TimeSeries: FunctionComponent<Props> = ({
-  timeSeries,
-  onChange,
-  variableOptionGroup,
-  onChangeOptions,
-}) => {
+export const TimeSeries: FunctionComponent<Props> = ({ timeSeries, onChange, variableOptionGroup }) => {
   return (
     <>
       <>
@@ -33,11 +27,15 @@ export const TimeSeries: FunctionComponent<Props> = ({
               options={[removeOption, ...variableOptionGroup[index]]}
               onChange={({ value: selectValue = '' }) => {
                 if (selectValue === removeText) {
-                  onChange(timeSeries.filter((_, i) => i >= index));
-                  onChangeOptions(variableOptionGroup.filter((_, i) => i >= index));
+                  console.log(index);
+                  timeSeries.filter((_, i) => i < index);
+                  variableOptionGroup.filter((_, i) => i < index);
+                  onChange(timeSeries, variableOptionGroup);
                 } else if (selectValue !== value) {
-                  onChange(timeSeries.map((v, i) => (i === index ? selectValue : v)).filter((_, i) => i > index));
-                  onChangeOptions(variableOptionGroup.filter((_, i) => i > index));
+                  onChange(
+                    timeSeries.map((v, i) => (i === index ? selectValue : v)).filter((_, i) => i > index),
+                    variableOptionGroup.filter((_, i) => i > index)
+                  );
                 }
               }}
             />
@@ -55,9 +53,9 @@ export const TimeSeries: FunctionComponent<Props> = ({
           if (item.value) {
             itemString = item.value;
           }
-          onChange([...timeSeries, itemString]);
+          onChange([...timeSeries, itemString], variableOptionGroup);
         }}
-        options={[...variableOptionGroup[variableOptionGroup.length - 1]]}
+        options={variableOptionGroup[variableOptionGroup.length - 1]}
       />
     </>
   );

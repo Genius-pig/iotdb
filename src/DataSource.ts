@@ -4,10 +4,14 @@ import {
   DataQueryResponse,
   DataSourceApi,
   DataSourceInstanceSettings,
+  FieldType,
+  MetricFindValue,
+  MutableDataFrame,
   toDataFrame,
 } from '@grafana/data';
 
 import { MyDataSourceOptions, MyQuery } from './types';
+import { toMetricFindValue } from './functions';
 
 export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   username: string;
@@ -22,15 +26,31 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   }
 
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
+    // const { range } = options;
+    // const dataFrames = options.targets.map(target => {
+    //   target.from = range!.from.valueOf();
+    //   target.to = range!.to.valueOf();
+    //   return this.doRequest(target);
+    // });
+    // return Promise.all(dataFrames)
+    //   .then(arrays => [].concat.apply([], arrays))
+    //   .then(data => ({ data }));
     const { range } = options;
-    const dataFrames = options.targets.map(target => {
-      target.from = range!.from.valueOf();
-      target.to = range!.to.valueOf();
-      return this.doRequest(target);
+    const from = range!.from.valueOf();
+    const to = range!.to.valueOf();
+
+    // Return a constant for each query.
+    const data = options.targets.map(target => {
+      return new MutableDataFrame({
+        refId: target.refId,
+        fields: [
+          { name: 'Time', values: [from, to], type: FieldType.time },
+          { name: 'Value', values: [1, 1], type: FieldType.number },
+        ],
+      });
     });
-    return Promise.all(dataFrames)
-      .then(arrays => [].concat.apply([], arrays))
-      .then(data => ({ data }));
+
+    return { data };
   }
 
   async doRequest(query: MyQuery) {
@@ -44,8 +64,28 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       .then(a => a.map(toDataFrame));
   }
 
+  metricFindQuery(query: any, options?: any): Promise<MetricFindValue[]> {
+    return this.getChildPaths(query);
+  }
+
+  async getChildPaths(detachedPath: string[]) {
+    const prefixPath: string = detachedPath.reduce((a, b) => a + '.' + b);
+    return await getBackendSrv()
+      .datasourceRequest({
+        method: 'GET',
+        url: this.url + '/getChildPaths?path=' + prefixPath,
+      })
+      .then(response => {
+        if (response.data instanceof Array) {
+          return response.data;
+        } else {
+          return [''];
+        }
+      })
+      .then(data => data.map(toMetricFindValue));
+  }
+
   async testDatasource() {
-    console.log(this.url + '/user/login?username=' + this.username + '&password=' + this.password);
     return getBackendSrv().datasourceRequest({
       url: this.url + '/user/login?username=' + this.username + '&password=' + this.password,
       method: 'GET',
