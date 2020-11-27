@@ -79,7 +79,11 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         if (response.data instanceof Array) {
           return response.data;
         } else {
-          return [''];
+          if(response.data.result.includes('measurement')) {
+            throw 'measurement';
+          } else {
+            return [''];
+          }
         }
       })
       .then(data => data.map(toMetricFindValue));

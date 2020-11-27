@@ -21,6 +21,7 @@ interface State {
   point: string;
   isAggregated: boolean;
   aggregated: string;
+  shouldAdd: boolean;
 }
 
 const selectElement = [
@@ -55,15 +56,27 @@ export class QueryEditor extends PureComponent<Props, State> {
     point: selectPoint[1],
     isAggregated: false,
     aggregated: selectRaw[0],
+    shouldAdd: true,
   };
 
-  onTimeSeriesChange = (t: string[], options: Array<Array<SelectableValue<string>>>) => {
+  onTimeSeriesChange = (t: string[], options: Array<Array<SelectableValue<string>>>, isRemove: boolean) => {
     const { onChange, query } = this.props;
     if (t.length === options.length) {
       this.props.datasource.metricFindQuery(['root', ...t]).then(a => {
         const b = a.map(a => a.text).map(toOption);
-        this.setState({ timeSeries: t, options: [...options, b] });
         onChange({ ...query, timeSeries: t });
+        if(isRemove) {
+          this.setState({ timeSeries: t, options: [...options, b], shouldAdd: true });
+        } else {
+          this.setState({ timeSeries: t, options: [...options, b] });
+        }
+      }).catch(e => {
+        if(e === 'measurement') {
+          onChange({ ...query, timeSeries: t });
+          this.setState({ timeSeries: t, shouldAdd: false })
+        } else {
+          this.setState({ shouldAdd: false });
+        }
       });
     } else {
       this.setState({ timeSeries: t });
@@ -107,6 +120,7 @@ export class QueryEditor extends PureComponent<Props, State> {
               timeSeries={this.state.timeSeries}
               onChange={this.onTimeSeriesChange}
               variableOptionGroup={this.state.options}
+              shouldAdd={this.state.shouldAdd}
             />
             <Segment
               onChange={({ value: value = '' }) => {

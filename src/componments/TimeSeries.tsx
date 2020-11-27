@@ -4,14 +4,15 @@ import { Segment, Icon, InlineFormLabel } from '@grafana/ui';
 
 export interface Props {
   timeSeries: string[];
-  onChange: (path: string[], options: Array<Array<SelectableValue<string>>>) => void;
+  onChange: (path: string[], options: Array<Array<SelectableValue<string>>>, isRemove: boolean) => void;
   variableOptionGroup: Array<Array<SelectableValue<string>>>;
+  shouldAdd: boolean;
 }
 
 const removeText = '-- remove stat --';
 const removeOption: SelectableValue<string> = { label: removeText, value: removeText };
 
-export const TimeSeries: FunctionComponent<Props> = ({ timeSeries, onChange, variableOptionGroup }) => {
+export const TimeSeries: FunctionComponent<Props> = ({ timeSeries, onChange, variableOptionGroup , shouldAdd}) => {
   return (
     <>
       <>
@@ -27,36 +28,36 @@ export const TimeSeries: FunctionComponent<Props> = ({ timeSeries, onChange, var
               options={[removeOption, ...variableOptionGroup[index]]}
               onChange={({ value: selectValue = '' }) => {
                 if (selectValue === removeText) {
-                  console.log(index);
-                  timeSeries.filter((_, i) => i < index);
-                  variableOptionGroup.filter((_, i) => i < index);
-                  onChange(timeSeries, variableOptionGroup);
+                  const nextTimeSeries = timeSeries.filter((_, i) => i < index);
+                  const nextOptions = variableOptionGroup.filter((_, i) => i < index);
+                  onChange(nextTimeSeries, nextOptions, true);
                 } else if (selectValue !== value) {
-                  onChange(
-                    timeSeries.map((v, i) => (i === index ? selectValue : v)).filter((_, i) => i > index),
-                    variableOptionGroup.filter((_, i) => i > index)
-                  );
+                  const nextTimeSeries = timeSeries.map((v, i) => (i === index ? selectValue : v)).filter((_, i) => i <= index);
+                  const nextOptions = variableOptionGroup.filter((_, i) => i <= index);
+                  onChange(nextTimeSeries, nextOptions, true);
                 }
               }}
             />
           </>
         ))}
-      <Segment
-        Component={
-          <a className="gf-form-label query-part">
-            <Icon name="plus" />
-          </a>
-        }
-        allowCustomValue
-        onChange={(item: SelectableValue<string>) => {
-          let itemString = '';
-          if (item.value) {
-            itemString = item.value;
+      {shouldAdd &&
+        <Segment
+          Component={
+            <a className="gf-form-label query-part">
+              <Icon name="plus" />
+            </a>
           }
-          onChange([...timeSeries, itemString], variableOptionGroup);
-        }}
-        options={variableOptionGroup[variableOptionGroup.length - 1]}
-      />
+          allowCustomValue
+          onChange={(item: SelectableValue<string>) => {
+            let itemString = '';
+            if (item.value) {
+              itemString = item.value;
+            }
+            onChange([...timeSeries, itemString], variableOptionGroup, false);
+          }}
+          options={variableOptionGroup[variableOptionGroup.length - 1]}
+        />
+      }
     </>
   );
 };
