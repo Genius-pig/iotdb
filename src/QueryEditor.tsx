@@ -45,7 +45,7 @@ export class QueryEditor extends PureComponent<Props, State> {
   state: State = {
     timeSeries: [],
     options: [[toOption('')]],
-    aggregation: '',
+    aggregation: selectElement[4],
     groupBy: {
       samplingInterval: '',
       step: '',
