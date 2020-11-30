@@ -28,6 +28,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
     const dataFrames = options.targets.map(target => {
       target.from = range!.from.valueOf();
       target.to = range!.to.valueOf();
+      target.timeSeries = ['root', ...target.timeSeries];
       return this.doRequest(target);
     });
     return Promise.all(dataFrames)

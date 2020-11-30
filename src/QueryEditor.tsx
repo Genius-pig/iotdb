@@ -43,7 +43,7 @@ type Props = QueryEditorProps<DataSource, MyQuery, MyDataSourceOptions>;
 
 export class QueryEditor extends PureComponent<Props, State> {
   state: State = {
-    timeSeries: ['root'],
+    timeSeries: [],
     options: [[toOption('')]],
     aggregation: '',
     groupBy: {
