@@ -31,7 +31,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       return this.doRequest(target);
     });
     return Promise.all(dataFrames)
-      .then(arrays => [].concat.apply([], arrays))
+      .then(a => a.reduce((accumulator, value) => accumulator.concat(value), []))
       .then(data => ({ data }));
     // const { range } = options;
     // const from = range!.from.valueOf();
@@ -59,7 +59,13 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         data: query,
       })
       .then(response => response.data)
-      .then(a => a.map(toDataFrame));
+      .then(a => {
+        if(a instanceof Array) {
+          return a.map(toDataFrame)
+        } else {
+          throw a.toString();
+        }
+      });
   }
 
   metricFindQuery(query: any, options?: any): Promise<MetricFindValue[]> {
