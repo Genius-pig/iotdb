@@ -4,9 +4,7 @@ import {
   DataQueryResponse,
   DataSourceApi,
   DataSourceInstanceSettings,
-  FieldType,
   MetricFindValue,
-  MutableDataFrame,
   toDataFrame,
 } from '@grafana/data';
 
@@ -26,31 +24,31 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
   }
 
   async query(options: DataQueryRequest<MyQuery>): Promise<DataQueryResponse> {
-    // const { range } = options;
-    // const dataFrames = options.targets.map(target => {
-    //   target.from = range!.from.valueOf();
-    //   target.to = range!.to.valueOf();
-    //   return this.doRequest(target);
-    // });
-    // return Promise.all(dataFrames)
-    //   .then(arrays => [].concat.apply([], arrays))
-    //   .then(data => ({ data }));
     const { range } = options;
-    const from = range!.from.valueOf();
-    const to = range!.to.valueOf();
-
-    // Return a constant for each query.
-    const data = options.targets.map(target => {
-      return new MutableDataFrame({
-        refId: target.refId,
-        fields: [
-          { name: 'Time', values: [from, to], type: FieldType.time },
-          { name: 'Value', values: [1, 1], type: FieldType.number },
-        ],
-      });
+    const dataFrames = options.targets.map(target => {
+      target.from = range!.from.valueOf();
+      target.to = range!.to.valueOf();
+      return this.doRequest(target);
     });
-
-    return { data };
+    return Promise.all(dataFrames)
+      .then(arrays => [].concat.apply([], arrays))
+      .then(data => ({ data }));
+    // const { range } = options;
+    // const from = range!.from.valueOf();
+    // const to = range!.to.valueOf();
+    //
+    // // Return a constant for each query.
+    // const data = options.targets.map(target => {
+    //   return new MutableDataFrame({
+    //     refId: target.refId,
+    //     fields: [
+    //       { name: 'Time', values: [from, to], type: FieldType.time },
+    //       { name: 'Value', values: [1, 1], type: FieldType.number },
+    //     ],
+    //   });
+    // });
+    //
+    // return { data };
   }
 
   async doRequest(query: MyQuery) {
