@@ -8,7 +8,6 @@ export interface Props {
   variableOptionGroup: Array<SelectableValue<string>>;
 }
 
-
 export const Aggregation: FunctionComponent<Props> = ({ aggregation, onChange, variableOptionGroup }) => {
   return (
     <Segment

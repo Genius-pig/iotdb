@@ -61,8 +61,8 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
       })
       .then(response => response.data)
       .then(a => {
-        if(a instanceof Array) {
-          return a.map(toDataFrame)
+        if (a instanceof Array) {
+          return a.map(toDataFrame);
         } else {
           throw a.toString();
         }
@@ -84,7 +84,7 @@ export class DataSource extends DataSourceApi<MyQuery, MyDataSourceOptions> {
         if (response.data instanceof Array) {
           return response.data;
         } else {
-          if(response.data.result.includes('measurement')) {
+          if (response.data.result.includes('measurement')) {
             throw 'measurement';
           } else {
             return [''];

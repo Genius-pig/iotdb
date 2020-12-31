@@ -12,7 +12,7 @@ export interface Props {
 const removeText = '-- remove stat --';
 const removeOption: SelectableValue<string> = { label: removeText, value: removeText };
 
-export const TimeSeries: FunctionComponent<Props> = ({ timeSeries, onChange, variableOptionGroup , shouldAdd}) => {
+export const TimeSeries: FunctionComponent<Props> = ({ timeSeries, onChange, variableOptionGroup, shouldAdd }) => {
   return (
     <>
       <>
@@ -32,7 +32,9 @@ export const TimeSeries: FunctionComponent<Props> = ({ timeSeries, onChange, var
                   const nextOptions = variableOptionGroup.filter((_, i) => i < index);
                   onChange(nextTimeSeries, nextOptions, true);
                 } else if (selectValue !== value) {
-                  const nextTimeSeries = timeSeries.map((v, i) => (i === index ? selectValue : v)).filter((_, i) => i <= index);
+                  const nextTimeSeries = timeSeries
+                    .map((v, i) => (i === index ? selectValue : v))
+                    .filter((_, i) => i <= index);
                   const nextOptions = variableOptionGroup.filter((_, i) => i <= index);
                   onChange(nextTimeSeries, nextOptions, true);
                 }
@@ -40,7 +42,7 @@ export const TimeSeries: FunctionComponent<Props> = ({ timeSeries, onChange, var
             />
           </>
         ))}
-      {shouldAdd &&
+      {shouldAdd && (
         <Segment
           Component={
             <a className="gf-form-label query-part">
@@ -57,7 +59,7 @@ export const TimeSeries: FunctionComponent<Props> = ({ timeSeries, onChange, var
           }}
           options={variableOptionGroup[variableOptionGroup.length - 1]}
         />
-      }
+      )}
     </>
   );
 };
